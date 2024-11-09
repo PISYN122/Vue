@@ -1,14 +1,9 @@
 <template>
   <div id="app">
-    <!-- Хедер з пошуком -->
     <AppHeader @search="handleSearch" />
 
-    <!-- Кнопка для відкриття адмін панелі -->
-    <button @click="openAdminPanel">Відкрити Адмін Панель</button>
-
-    <!-- Контейнер для блоків з фото -->
     <div class="image-blocks-container">
-      <!-- Динамічно генеруємо блоки, залежно від фільтрованих даних -->
+      <!-- Виводимо лише відфільтровані блоки -->
       <ImageBlock
         v-for="(block, index) in filteredBlocks"
         :key="index"
@@ -20,24 +15,18 @@
       />
     </div>
 
-    <!-- Викликаємо ImageView компонент для модального вікна -->
     <ImageView v-if="isModalOpen" :block="modalContent" @close="closeModal" />
-
-    <!-- Викликаємо AdminPanel компонент для модального вікна -->
     <AdminPanel :isAdminPanelOpen="isAdminPanelOpen" @close="closeAdminPanel" />
+    <AppFooter />
 
-    <!-- Якщо дані ще не завантажено -->
     <div v-if="isLoading" class="loading">
       Завантаження даних...
     </div>
-
-    <!-- Футер -->
-    <AppFooter />
   </div>
 </template>
 
 <script>
-import AppHeader from './components/AppHeader.vue';  
+import AppHeader from './components/AppHeader.vue';
 import { getFirestore, collection, getDocs } from 'firebase/firestore';
 import { initializeApp } from 'firebase/app';
 import ImageBlock from './components/ImageBlock.vue';
@@ -54,7 +43,6 @@ const firebaseConfig = {
   appId: "1:85293578380:web:ed0c76faa5ec0877f623a9"
 };
 
-// Ініціалізація Firebase
 const app = initializeApp(firebaseConfig);
 const firestore = getFirestore(app);
 
@@ -74,14 +62,14 @@ export default {
       searchQuery: '',  // Змінна для пошуку
       isModalOpen: false,
       modalContent: {},
-      isAdminPanelOpen: false, // Відкриття адмін панелі
-      isLoading: false // Статус завантаження
+      isAdminPanelOpen: false,
+      isLoading: false, // Статус завантаження
     };
   },
   async mounted() {
-    this.isLoading = true; // Починаємо завантаження
+    this.isLoading = true;
     await this.fetchTrips();
-    this.isLoading = false; // Завантаження завершено
+    this.isLoading = false;
   },
   methods: {
     async fetchTrips() {
@@ -103,31 +91,36 @@ export default {
             price: data.price,
           };
         });
-        this.filteredBlocks = [...this.blocks]; // Спочатку всі блоки доступні
+        // Зберігаємо блоки для фільтрації
+        this.filteredBlocks = [...this.blocks];
+        console.log('Fetched blocks:', this.blocks);  // Перевірка блоків
       } catch (error) {
         console.error('Помилка при отриманні документів з Firestore:', error.message);
         alert("Помилка при завантаженні даних!");
       }
     },
     handleSearch(query) {
-      this.searchQuery = query; // Оновлюємо запит пошуку
-      this.filterBlocks(); // Оновлюємо відфільтровані блоки
+      // Оновлюємо пошуковий запит
+      this.searchQuery = query.trim();
+      this.filterBlocks();
     },
     filterBlocks() {
-      if (this.searchQuery.trim()) {
+      console.log('Searching with query:', this.searchQuery); // Перевірка запиту
+      if (this.searchQuery) {
         this.filteredBlocks = this.blocks.filter(block => {
-          // Фільтруємо блоки за допомогою пошукового запиту
+          const query = this.searchQuery.toLowerCase();
           return (
-            block.description.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            block.bus_driver.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            block.zvidki_pryruye.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
-            block.kudy_pryruye.toLowerCase().includes(this.searchQuery.toLowerCase())
+            block.description.toLowerCase().includes(query) ||
+            block.bus_driver.toLowerCase().includes(query) ||
+            block.zvidki_pryruye.toLowerCase().includes(query) ||
+            block.kudy_pryruye.toLowerCase().includes(query)
           );
         });
       } else {
-        // Якщо немає запиту, показуємо всі блоки
+        // Якщо запит порожній, показуємо всі блоки
         this.filteredBlocks = [...this.blocks];
       }
+      console.log('Filtered blocks:', this.filteredBlocks);  // Перевірка фільтрованих блоків
     },
     openModal(block) {
       this.modalContent = block;
@@ -137,10 +130,16 @@ export default {
       this.isModalOpen = false;
     },
     openAdminPanel() {
-      this.isAdminPanelOpen = true; // Відкриваємо адмін панель
+      this.isAdminPanelOpen = true;
     },
     closeAdminPanel() {
-      this.isAdminPanelOpen = false; // Закриваємо адмін панель
+      this.isAdminPanelOpen = false;
+    }
+  },
+  watch: {
+    searchQuery() {
+      // Кожного разу, коли змінюється пошуковий запит, фільтруємо блоки
+      this.filterBlocks();
     }
   }
 };

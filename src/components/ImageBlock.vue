@@ -1,11 +1,13 @@
 <template>
   <div class="image-block" @click="$emit('click')">
     <img :src="imageSrc" :alt="imageAlt" />
-    <p>{{ description }}</p>
-
-    <!-- Статична оцінка водія -->
-    <div>
-      <span>Оцінка водія: {{ driverRating }}</span>
+    <div class="text-block">
+      <div class="column">
+        <span>{{ description }}</span>
+      </div>
+      <div class="column">
+        <span>Оцінка водія: {{ driverRating }}</span>
+      </div>
     </div>
   </div>
 </template>
@@ -32,9 +34,8 @@ export default {
     }
   },
   computed: {
-    // Оцінка водія буде відображатися лише для перегляду
     driverRating() {
-      return this.rating ? this.rating : 'Не оцінено';  // Якщо оцінки немає, показуємо "Не оцінено"
+      return this.rating ? this.rating : 'Не оцінено';
     }
   }
 };
@@ -45,7 +46,6 @@ export default {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 16px;
-  text-align: center;
   max-width: 200px;
   margin: 10px;
   cursor: pointer;
@@ -56,8 +56,19 @@ export default {
   border-radius: 4px;
 }
 
-.image-block p {
-  margin-top: 8px;
+.text-block {
+  display: flex;
+  justify-content: space-between;
+  text-align: left; /* Вирівнювання тексту по лівій стінці */
+}
+
+.column {
+  flex: 1;
+  margin: 8px;
+  text-align: left; /* Вирівнювання тексту по лівій стінці */
+}
+
+.text-block span {
   font-size: 14px;
   color: #333;
 }
