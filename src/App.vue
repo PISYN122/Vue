@@ -3,7 +3,6 @@
     <AppHeader @search="handleSearch" />
 
     <div class="image-blocks-container">
-      <!-- Виводимо лише відфільтровані блоки -->
       <ImageBlock
         v-for="(block, index) in filteredBlocks"
         :key="index"
@@ -117,10 +116,10 @@ export default {
           );
         });
       } else {
-        // Якщо запит порожній, показуємо всі блоки
+        //запит порожній, показуємо всі блоки
         this.filteredBlocks = [...this.blocks];
       }
-      console.log('Filtered blocks:', this.filteredBlocks);  // Перевірка фільтрованих блоків
+      console.log('Filtered blocks:', this.filteredBlocks);  // перевірка фільтрованих блоків
     },
     openModal(block) {
       this.modalContent = block;
